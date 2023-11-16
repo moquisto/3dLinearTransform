@@ -1,0 +1,1 @@
+If framerate drops, consider using Numba which converts python code to machine code.
