@@ -8,12 +8,12 @@ class Camera:
         self.forward = np.array([0,0,1,1])
         self.right = np.array([1,0,0,1])
         self.up = np.array([0,1,0,1])
-        self.h_fov = math.pi / 3
+        self.h_fov = math.pi / 2 #original was 3
         self.v_fov = self.h_fov * (render.HEIGHT / render.WIDTH)
         self.near_plane = 0.1
         self.far_plane = 100
-        self.movement_speed = 0.02
-        self.rotation_speed = 0.01
+        self.movement_speed = 0.06
+        self.rotation_speed = 0.03
     
     def controls(self):
         key = pg.key.get_pressed()
