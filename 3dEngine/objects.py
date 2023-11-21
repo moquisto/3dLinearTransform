@@ -81,10 +81,10 @@ class Axes(Object3D):
         self.label = "XYZ"
 
 class Vector(Object3D):
-    def __init__(self, render):
+    def __init__(self, render, vector):
         super().__init__(render)
         self.verteces = np.array([
-            (0,0,0,1), (1,1,1,1)
+            (0,0,0,1), (vector[0], vector[1] ,vector[2] ,1)
         ])
         self.faces = np.array([(0, 1)])
         self.colors = [pg.Color("purple")]

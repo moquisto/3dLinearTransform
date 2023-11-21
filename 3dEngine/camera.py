@@ -12,8 +12,8 @@ class Camera:
         self.v_fov = self.h_fov * (render.HEIGHT / render.WIDTH)
         self.near_plane = 0.1
         self.far_plane = 100
-        self.movement_speed = 0.06
-        self.rotation_speed = 0.03
+        self.movement_speed = 0.1
+        self.rotation_speed = 0.05
     
     def controls(self):
         key = pg.key.get_pressed()
@@ -57,7 +57,7 @@ class Camera:
             [0,1,0,1],
             [0,0,1,0],
             [-x,-y,-z,1]
-        ])
+        ]) #This is also odd. I don't fully understand this yet. w isn't used for any of these. Why do we take the negative? Why is there a one on the second row last column?
     
     def rotation_matrix(self):
         rx, ry, rz, w = self.right

@@ -1,6 +1,7 @@
 from objects import *
 from camera import *
 from projection import *
+from components import *
 import pygame as pg
 
 class SoftwareRender:
@@ -18,33 +19,46 @@ class SoftwareRender:
         self.camera.camera_pitch(0.2)
         self.camera.camera_yaw(-0.1)
         self.projection = Projection(self)
-        #self.object = Object3D(self)
-        #self.object.translate([0.2, 0.4, 0.2])
-        #self.axes = Axes(self)
-        #self.axes.translate([0.7, 0.9, 0.7])
+        self.object = Object3D(self)
+        self.object.translate([0.2, 0.4, 0.2])
+        self.axes = Axes(self)
+        self.axes.translate([0.7, 0.9, 0.7])
         self.world_axes = Axes(self)
         self.world_axes.movement_flag = False
         self.world_axes.scale(2.5)
         self.world_axes.translate([0.0001, 0.0001, 0.0001])
-        self.vector = Vector(self)
-        self.vector.translate([0.0001, 0.0001, 0.0001]) #Translation how far from z axis
-        self.vector.movement_flag = False
+        self.v1Button = InputButton(self, 50, 50, 40, 40, "1")
+        self.v2Button = InputButton(self, 50, 100, 40, 40, "1")
+        self.v3Button = InputButton(self, 50, 150, 40, 40, "1")
+        self.vectorButtons = [self.v1Button, self.v2Button, self.v3Button]
+        self.transformButton = TransformButton(self, 150, 150, 145, 40, "Transform")
+
     
     def draw(self):
         self.screen.fill(pg.Color("darkslategray"))
         self.world_axes.draw()
         #self.axes.draw()
         #self.object.draw()
+        self.vector = Vector(self, self.transformButton.animation_vector)
+        self.vector.translate([0.0001, 0.0001, 0.0001]) #Translation how far from z axis
+        self.vector.movement_flag = False
         self.vector.draw()
+        for button in self.vectorButtons:
+            button.draw()
+        self.transformButton.draw()
+        
     
     def run(self):
         while True:
+            self.transformButton.transformAnimation()
             self.draw()
             self.camera.controls()
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     exit()
-            #[exit() for i in pg.event.get() if i.type == i.type == pg.QUIT]
+                for button in self.vectorButtons:
+                    button.eventHandler(ev)
+                self.transformButton.eventHandler(ev, self.vectorButtons)
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(self.FPS)

@@ -8,7 +8,7 @@ def translate(pos):
         [0, 1, 0, 0], 
         [0, 0, 1, 0],
         [tx, ty, tz, 1]
-    ])
+    ]) # This is a bit weird. I thought translation would have its values on the last vector, not the last row.
 
 def rotate_x(a):
     return np.array([
