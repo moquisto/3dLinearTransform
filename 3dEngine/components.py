@@ -55,11 +55,11 @@ class TransformButton:
                     self.goal_vector[i] = float(vectorButtons[i].text)
                     if self.vector[i] != self.goal_vector[i]:
                         sign = -1 if self.vector[i] > self.goal_vector[i] else 1
-                        self.delta_coord[i] = sign * (abs(self.vector[i]) + abs(float(self.goal_vector[i])))
-                self.change = True
-                print(self.change)
-                print(self.goal_vector)
-                print(self.delta_coord)
+                        self.delta_coord[i] = sign*abs(self.vector[i] - (self.goal_vector[i]))
+                        self.change = True
+                print("current " + str(self.vector))
+                print("end " + str(self.goal_vector))
+                print("change " + str(self.delta_coord))
 
     def transformAnimation(self): #Modifies the vector values that are passed to the vector object until reaching goal-vector
         if self.change == True:
@@ -68,10 +68,12 @@ class TransformButton:
                 self.animation_vector[i] = self.animation_vector[i] + (1/120) * self.delta_coord[i] #after 120 iterations, animation will be equal to goal
             self.count += 1
             if self.count == 120:
+                self.animation_vector = self.goal_vector[:]
                 self.change = False
                 self.count = 1
-                self.vector = self.goal_vector[:]
-                print(self.vector)
+                self.delta_coord = [0, 0, 0]
+                self.vector = self.animation_vector[:]
+                print("changed "+ str(self.vector))
 
 
 
