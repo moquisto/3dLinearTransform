@@ -32,9 +32,12 @@ class SoftwareRender:
         self.v3Button = InputButton(self, 50, 150, 40, 40, "1")
         self.vectorButtons = [self.v1Button, self.v2Button, self.v3Button]
         self.transformButton = TransformButton(self, 150, 150, 145, 40, "Transform")
-
+        self.mainToTransform = navigationButton(self, 50, 200, 250, 40, "Transformation menu")
+        self.transformToMain = navigationButton(self, 50, 200, 250, 40, "Main")
+        self.transformToPresets = navigationButton(self, 50, 300, 200, 40, "Presets")
+        self.presetsToTransform = navigationButton(self, 50, 200, 250, 40, "Transformation menu")
     
-    def draw(self):
+    def draw_main(self):
         self.screen.fill(pg.Color("darkslategray"))
         self.world_axes.draw()
         #self.axes.draw()
@@ -46,12 +49,16 @@ class SoftwareRender:
         for button in self.vectorButtons:
             button.draw()
         self.transformButton.draw()
+        self.mainToTransform.draw()
         
     
-    def run(self):
+    def main(self):
         while True:
+            if self.mainToTransform.switch == True:
+                self.transformationScreen()
+                self.mainToTransform.switch = False
             self.transformButton.transformAnimation()
-            self.draw()
+            self.draw_main()
             self.camera.controls()
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
@@ -59,10 +66,59 @@ class SoftwareRender:
                 for button in self.vectorButtons:
                     button.eventHandler(ev)
                 self.transformButton.eventHandler(ev, self.vectorButtons)
+                self.mainToTransform.eventHandler(ev)
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(self.FPS)
 
+    def draw_transform(self):
+        self.screen.fill(pg.Color("darkslategray"))
+        self.transformToMain.draw()
+        self.transformToPresets.draw()
+
+    
+    def transformationScreen(self):
+        self.screen.fill(pg.Color("darkslategray"))
+        running = True
+        while running:
+            if self.transformToMain.switch == True:
+                running = False
+                self.transformToMain.switch = False
+            if self.transformToPresets.switch == True:
+                self.presetsScreen()
+                self.transformToPresets.switch = False
+            self.draw_transform()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    exit()
+                self.transformToMain.eventHandler(event)
+                self.transformToPresets.eventHandler(event)
+            pg.display.set_caption(str(self.clock.get_fps()))
+            pg.display.flip()
+            self.clock.tick(60)
+
+    def draw_presets(self):
+        self.screen.fill(pg.Color("darkslategray"))
+        self.presetsToTransform.draw()
+
+    
+    def presetsScreen(self):
+        self.screen.fill(pg.Color("darkslategray"))
+        running = True
+        while running:
+            if self.presetsToTransform.switch == True:
+                running = False
+                self.presetsToTransform.switch = False
+            self.draw_presets()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    exit()
+                self.presetsToTransform.eventHandler(event)
+            pg.display.set_caption(str(self.clock.get_fps()))
+            pg.display.flip()
+            self.clock.tick(60)
+
+
 if __name__ =="__main__":
     app = SoftwareRender()
-    app.run()
+    app.main()
