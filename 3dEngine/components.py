@@ -1,6 +1,8 @@
 import pygame as pg
 from objects import *
 
+numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
 class InputButton:
     def __init__(self, render, x, y, w, h, text = ""):
         self.render = render
@@ -25,14 +27,82 @@ class InputButton:
                     self.COLOR = self.COLOR_INACTIVATED
                 if event.key == pg.K_BACKSPACE:
                     self.text = self.text[:-1]
+                    self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
                 else:
-                    self.text += event.unicode
-                self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
+                    try:
+                        int(event.unicode)
+                        self.text += event.unicode
+                        self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
+                    except:
+                        if event.unicode == ".":
+                            self.text += event.unicode
+                            self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
 
 
     def draw(self):
         pg.draw.rect(self.render.screen, self.COLOR, self.rectangle, 3)
         self.render.screen.blit(self.displayed_text, (self.rectangle.x + self.rectangle.w / 3, self.rectangle.y + self.rectangle.h / 4))
+
+class CreateVector:
+    """This class will create a 3d vector object as well as 3 input buttons for xyz coordinates and 1 confirm button.
+    With this class I will be able to repeatedly create new vectors to experiment with. Is this necessary? Perhaps not, but it will likely make
+    things a bit easier when linking matrices to vectors. I should later on add some kind of "for active_object in 3dobjects: apply transformation" thing.
+    Should I add the possibility to drag and drop these too? Tbh could be nice.
+    Another reason to construct this class is to freely be able to remove vectors if I want to exchange it for a grid for example. This will
+    also lay the groundwork for similar classes.
+    I should label new vectors according to numbers"""
+    def __init__(self, render, x, y, text = ""):
+        self.render = render
+        self.container = pg.Rect(x-10, y-10, 190, 160)
+        self.FONT = pg.font.Font(None, 32)
+        self.COLOR = pg.Color("black")
+        self.inputButtons = []
+        self.active = False
+        for i in range(3):
+            self.inputButtons.append(InputButton(render, x, y+(i*50), 40, 40, "1"))
+        #self.vector = Vector(self.render, self.inputButtons)
+        self.confirmationButton = pg.Rect(x+60, y+50, 110, 40)
+        self.text = text
+        self.goal_vector = [1, 1, 1, 1]
+        self.delta_coord = [0, 0, 0]
+        self.change = False
+        self.count = 1
+
+    def draw(self):
+        pg.draw.rect(self.render.screen, self.COLOR, self.container, 3)
+        for button in self.inputButtons:
+            button.draw()
+        pg.draw.rect(self.render.screen, self.COLOR, self.confirmationButton, 3)
+        self.render.screen.blit(self.FONT.render("Change", True, self.COLOR), (self.confirmationButton.x + self.confirmationButton.w / 8, self.confirmationButton.y + self.confirmationButton.h / 4))
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("red")), (self.container.x + 80, self.container.y + 15))
+
+    def eventHandler(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    self.active = True
+        if self.active == True:
+            if event.type == pg.MOUSEMOTION:
+                for button in self.inputButtons:
+                    button.rectangle.move_ip(event.rel)
+                self.container.move_ip(event.rel)
+                self.confirmationButton.move_ip(event.rel)
+        if event.type == pg.MOUSEBUTTONUP:
+            if event.button == 1:
+                self.active = False
+        for button in self.inputButtons:
+            button.eventHandler(event)
+        
+
+
+
+
+
+
+
+
+
+
 
 class TransformButton:
     def __init__(self, render, x, y, w, h, text = ""):
@@ -98,3 +168,40 @@ class navigationButton:
     def draw(self):
         pg.draw.rect(self.render.screen, pg.Color("black"), self.rectangle, 3)
         self.render.screen.blit(self.displayed_text, (self.rectangle.x + 10, self.rectangle.y + 10))
+
+class InputMatrix:
+    #Will render a rectangle with 9 inputbuttons inside. I will then add a drag effect on the big rectangle.
+    #This will only be the matrix, I won't have any transformation buttons attached since I want to be able to chain transformations.
+    #How will I do the transformation? I still need to have a choose vector button. It can basically be current transformation button but I reduce the animation time
+    #To maybe 1 second or 1/2 second. The actual transformation button should be a modificed version of the current transformation button. Still I think I need to change
+    #the transformation button a bit.
+    def __init__(self, render, x, y):
+        self.container = pg.Rect(x-20, y-20, 180, 180)
+        self.buttonList = []
+        self.render = render
+        self.active = False
+        for i in range(3):
+            for j in range(3):
+                self.buttonList.append(InputButton(render, x+(j*50), y+(i*50), 40, 40, "1"))
+    
+    def draw(self):
+        pg.draw.rect(self.render.screen, pg.Color("grey"), self.container)
+        for button in self.buttonList:
+            button.draw()
+    
+    def eventHandler(self, event):
+        #Move matrix
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    self.active = True
+        if self.active == True:
+            if event.type == pg.MOUSEMOTION:
+                for button in self.buttonList:
+                    button.rectangle.move_ip(event.rel)
+                self.container.move_ip(event.rel)
+        if event.type == pg.MOUSEBUTTONUP:
+            if event.button == 1:
+                self.active = False
+        for button in self.buttonList: #Activate inputbuttons
+            button.eventHandler(event)
