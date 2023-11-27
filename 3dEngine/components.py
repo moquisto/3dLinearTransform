@@ -38,12 +38,36 @@ class InputButton:
                             self.text += event.unicode
                             self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
 
-
     def draw(self):
         pg.draw.rect(self.render.screen, self.COLOR, self.rectangle, 3)
         self.render.screen.blit(self.displayed_text, (self.rectangle.x + self.rectangle.w / 3, self.rectangle.y + self.rectangle.h / 4))
 
 class CreateVector:
+    def __init__(self, render, x, y):
+        self.render = render
+        self.text = "Spawn vector"
+        self.FONT = pg.font.Font(None,32)
+        self.container = pg.Rect(x, y, 170, 40)
+        self.vectorList = []
+    
+    def eventHandler(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    self.vectorList.append(VectorPackage(self.render, 50, 500, f"V{len(self.vectorList)+1}"))
+        if len(self.vectorList) != 0:
+            for vectorPack in self.vectorList:
+                vectorPack.eventHandler(event)
+
+    def draw(self):
+        pg.draw.rect(self.render.screen, pg.Color("black"), self.container, 3)
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("black")), (self.container.x + 10, self.container.y + 10))
+        if len(self.vectorList) != 0:
+            for vectorPack in self.vectorList:
+                vectorPack.draw()
+
+
+class VectorPackage:
     """This class will create a 3d vector object as well as 3 input buttons for xyz coordinates and 1 confirm button.
     With this class I will be able to repeatedly create new vectors to experiment with. Is this necessary? Perhaps not, but it will likely make
     things a bit easier when linking matrices to vectors. I should later on add some kind of "for active_object in 3dobjects: apply transformation" thing.
@@ -60,10 +84,11 @@ class CreateVector:
         self.active = False
         for i in range(3):
             self.inputButtons.append(InputButton(render, x, y+(i*50), 40, 40, "1"))
-        #self.vector = Vector(self.render, self.inputButtons)
         self.confirmationButton = pg.Rect(x+60, y+50, 110, 40)
         self.text = text
+        self.og_vector = [1, 1, 1, 1]
         self.goal_vector = [1, 1, 1, 1]
+        self.animation_vector = [1, 1, 1, 1]
         self.delta_coord = [0, 0, 0]
         self.change = False
         self.count = 1
@@ -75,12 +100,26 @@ class CreateVector:
         pg.draw.rect(self.render.screen, self.COLOR, self.confirmationButton, 3)
         self.render.screen.blit(self.FONT.render("Change", True, self.COLOR), (self.confirmationButton.x + self.confirmationButton.w / 8, self.confirmationButton.y + self.confirmationButton.h / 4))
         self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("red")), (self.container.x + 80, self.container.y + 15))
+        self.vector = Vector(self.render, self.animation_vector)
+        self.vector.translate([0.0001, 0.0001, 0.0001])
+        self.vector.movement_flag = False
+        self.vector.draw()
 
     def eventHandler(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:
                 if self.container.collidepoint(event.pos):
                     self.active = True
+                if self.confirmationButton.collidepoint(event.pos):
+                    for i in range(3):
+                        self.goal_vector[i] = float(self.inputButtons[i].text)
+                        if self.og_vector[i] != self.goal_vector[i]:
+                            sign = -1 if self.og_vector[i] > self.goal_vector[i] else 1
+                            self.delta_coord[i] = sign*abs(self.og_vector[i] - (self.goal_vector[i]))
+                            self.change = True
+                    print("current " + str(self.og_vector))
+                    print("change " + str(self.delta_coord))
+                    print("end " + str(self.goal_vector))
         if self.active == True:
             if event.type == pg.MOUSEMOTION:
                 for button in self.inputButtons:
@@ -92,18 +131,21 @@ class CreateVector:
                 self.active = False
         for button in self.inputButtons:
             button.eventHandler(event)
-        
+    
+    def animate(self):
+        if self.change == True:
+            for i in range(3):
+                self.animation_vector[i] = self.animation_vector[i] + (1/60) * self.delta_coord[i]
+            self.count += 1
+            if self.count == 60:
+                self.animation_vector = self.goal_vector[:]
+                self.change = False
+                self.count = 1
+                self.delta_coord = [0, 0, 0]
+                self.og_vector = self.animation_vector[:]
 
 
-
-
-
-
-
-
-
-
-
+"""
 class TransformButton:
     def __init__(self, render, x, y, w, h, text = ""):
         self.render = render
@@ -149,7 +191,8 @@ class TransformButton:
     def draw(self):
         pg.draw.rect(self.render.screen, self.COLOR, self.rectangle, 3)
         self.render.screen.blit(self.FONT.render(self.text, True, self.COLOR), (self.rectangle.x + self.rectangle.w / 8, self.rectangle.y + self.rectangle.h / 4))
-
+"""
+        
 class navigationButton:
     def __init__(self, render, x, y, w, h, text = ""):
         self.render = render

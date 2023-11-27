@@ -27,17 +27,22 @@ class SoftwareRender:
         self.world_axes.movement_flag = False
         self.world_axes.scale(2.5)
         self.world_axes.translate([0.0001, 0.0001, 0.0001])
+
+        self.create_vector = CreateVector(self, 50, 100)
+
+        """
         self.v1Button = InputButton(self, 50, 50, 40, 40, "1")
         self.v2Button = InputButton(self, 50, 100, 40, 40, "1")
         self.v3Button = InputButton(self, 50, 150, 40, 40, "1")
         self.vectorButtons = [self.v1Button, self.v2Button, self.v3Button] #These should be a single function tbh - will integrate into some kind of add vector button.
         self.transformButton = TransformButton(self, 150, 150, 145, 40, "Transform")
+        """
+        
         self.mainToTransform = navigationButton(self, 50, 200, 250, 40, "Transformation menu")
         self.transformToMain = navigationButton(self, 50, 200, 250, 40, "Main")
         self.transformToPresets = navigationButton(self, 50, 300, 200, 40, "Presets")
         self.presetsToTransform = navigationButton(self, 50, 200, 250, 40, "Transformation menu")
         self.inputMatrix = InputMatrix(self, 400, 100)
-        self.new_vector = CreateVector(self, 200, 500, "V1")
     
     def draw_main(self):
         self.screen.fill(pg.Color("darkslategray"))
@@ -45,11 +50,13 @@ class SoftwareRender:
         #self.axes.draw()
         #self.object.draw()
 
+        self.create_vector.draw()
 
         #I will replace this with a new create-vector button which will create new instances of the create-vector class and add them to a list.
         #For each vector in the list, all of the following will be called basically.
-        self.new_vector.draw()
 
+        
+        """
         self.vector = Vector(self, self.transformButton.animation_vector)
         self.vector.translate([0.0001, 0.0001, 0.0001]) #Translation how far from z axis
         self.vector.movement_flag = False
@@ -57,7 +64,7 @@ class SoftwareRender:
         for button in self.vectorButtons:
             button.draw()
         self.transformButton.draw()
-
+        """
 
         self.mainToTransform.draw()
         
@@ -67,17 +74,24 @@ class SoftwareRender:
             if self.mainToTransform.switch == True:
                 self.transformationScreen()
                 self.mainToTransform.switch = False
+            """
             self.transformButton.transformAnimation()
+            """
+            if len(self.create_vector.vectorList) != 0:
+                for vectorPack in self.create_vector.vectorList:
+                    vectorPack.animate()
             self.draw_main()
             self.camera.controls()
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     exit()
+                """
                 for button in self.vectorButtons:
                     button.eventHandler(ev)
                 self.transformButton.eventHandler(ev, self.vectorButtons)
+                """
                 self.mainToTransform.eventHandler(ev)
-                self.new_vector.eventHandler(ev)
+                self.create_vector.eventHandler(ev)
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(self.FPS)
