@@ -7,7 +7,8 @@ class InputButton:
     def __init__(self, render, x, y, w, h, text = ""):
         self.render = render
         self.FONT = pg.font.Font(None, 32)
-        self.COLOR_ACTIVATED, self.COLOR_INACTIVATED, self.COLOR = pg.Color("red"), pg.Color("black"), pg.Color("black")
+        self.COLOR_ACTIVATED, self.COLOR_INACTIVATED, self.COLOR = pg.Color("red"), pg.Color("white"), pg.Color("white")
+        self.TEXT_COLOR = pg.Color("white")
         self.rectangle = pg.Rect(x, y, w, h)
         self.text = text
         self.displayed_text = self.FONT.render(self.text, True, self.COLOR)
@@ -27,16 +28,16 @@ class InputButton:
                     self.COLOR = self.COLOR_INACTIVATED
                 if event.key == pg.K_BACKSPACE:
                     self.text = self.text[:-1]
-                    self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
+                    self.displayed_text = self.FONT.render(self.text, True, self.TEXT_COLOR)
                 else:
                     try:
                         int(event.unicode)
                         self.text += event.unicode
-                        self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
+                        self.displayed_text = self.FONT.render(self.text, True, self.TEXT_COLOR)
                     except:
                         if event.unicode == ".":
                             self.text += event.unicode
-                            self.displayed_text = self.FONT.render(self.text, True, pg.Color("black"))
+                            self.displayed_text = self.FONT.render(self.text, True, self.TEXT_COLOR)
 
     def draw(self):
         pg.draw.rect(self.render.screen, self.COLOR, self.rectangle, 3)
@@ -60,8 +61,8 @@ class CreateVector:
                 vectorPack.eventHandler(event)
 
     def draw(self):
-        pg.draw.rect(self.render.screen, pg.Color("black"), self.container, 3)
-        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("black")), (self.container.x + 10, self.container.y + 10))
+        pg.draw.rect(self.render.screen, pg.Color("white"), self.container, 3)
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("white")), (self.container.x + 10, self.container.y + 10))
         if len(self.vectorList) != 0:
             for vectorPack in self.vectorList:
                 vectorPack.draw()
@@ -79,7 +80,7 @@ class VectorPackage:
         self.render = render
         self.container = pg.Rect(x-10, y-10, 190, 160)
         self.FONT = pg.font.Font(None, 32)
-        self.COLOR = pg.Color("black")
+        self.COLOR = pg.Color("white")
         self.inputButtons = []
         self.active = False
         for i in range(3):
@@ -145,7 +146,9 @@ class VectorPackage:
                 self.og_vector = self.animation_vector[:]
 
 
+
 """
+This was part of the foundation for the VectorPackage class - name was slightly misleading
 class TransformButton:
     def __init__(self, render, x, y, w, h, text = ""):
         self.render = render
@@ -199,7 +202,7 @@ class navigationButton:
         self.FONT = pg.font.Font(None, 32)
         self.rectangle = pg.Rect(x, y, w, h)
         self.text = text
-        self.COLOR = pg.Color("black")
+        self.COLOR = pg.Color("white")
         self.displayed_text = self.FONT.render(self.text, True, self.COLOR)
         self.switch = False
     
@@ -209,7 +212,7 @@ class navigationButton:
                 self.switch = True
     
     def draw(self):
-        pg.draw.rect(self.render.screen, pg.Color("black"), self.rectangle, 3)
+        pg.draw.rect(self.render.screen, self.COLOR, self.rectangle, 3)
         self.render.screen.blit(self.displayed_text, (self.rectangle.x + 10, self.rectangle.y + 10))
 
 class InputMatrix:
@@ -218,19 +221,22 @@ class InputMatrix:
     #How will I do the transformation? I still need to have a choose vector button. It can basically be current transformation button but I reduce the animation time
     #To maybe 1 second or 1/2 second. The actual transformation button should be a modificed version of the current transformation button. Still I think I need to change
     #the transformation button a bit.
-    def __init__(self, render, x, y):
-        self.container = pg.Rect(x-20, y-20, 180, 180)
+    def __init__(self, render, x, y, text = ""):
+        self.container = pg.Rect(x-20, y-40, 180, 200)
         self.buttonList = []
         self.render = render
+        self.text = text
+        self.FONT = pg.font.Font(None, 32)
         self.active = False
         for i in range(3):
             for j in range(3):
                 self.buttonList.append(InputButton(render, x+(j*50), y+(i*50), 40, 40, "1"))
     
     def draw(self):
-        pg.draw.rect(self.render.screen, pg.Color("grey"), self.container)
+        pg.draw.rect(self.render.screen, pg.Color("white"), self.container, 3)
         for button in self.buttonList:
             button.draw()
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("red")), (self.container.x + 75, self.container.y + 10))
     
     def eventHandler(self, event):
         #Move matrix
@@ -248,3 +254,163 @@ class InputMatrix:
                 self.active = False
         for button in self.buttonList: #Activate inputbuttons
             button.eventHandler(event)
+
+class CreateMatrix:
+    def __init__(self, render, x, y):
+        self.render = render
+        self.text = "Spawn matrix"
+        self.FONT = pg.font.Font(None, 32)
+        self.container = pg.Rect(x, y, 170, 40)
+        self.matrixList = []
+    
+    def eventHandler(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    self.matrixList.append(InputMatrix(self.render, 400, 100, f"M{len(self.matrixList)+1}"))
+        if len(self.matrixList) != 0:
+            for matrix in self.matrixList:
+                matrix.eventHandler(event)
+
+    def draw(self):
+        pg.draw.rect(self.render.screen, pg.Color("white"), self.container, 3)
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("white")), (self.container.x + 10, self.container.y + 10))
+        if len(self.matrixList) != 0:
+            for matrix in self.matrixList:
+                matrix.draw()
+        
+
+class TransformButton:
+    def __init__(self, render, x, y):
+        self.render = render
+        self.container = pg.Rect(x, y, 200, 40)
+        self.text = "Transform"
+        self.FONT = pg.font.Font(None, 32)
+        self.COLOR = pg.Color("white")
+        self.matrices = []
+        self.objectList = []
+
+    def eventHandler(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    """Check whether objectList is empty, if that's the case, pass, else, check the order of the matrices on the transformationscreen
+                    and perform a few matrixmultiplications to obtain the resulting transformation. Then apply that on the objects in objectList.
+                    How Should I design objectList? Later on, I will have more than just vectors, and I could also have both a grid and a few vectors
+                    active at the same time. Since I allow the user to change the vector manually and not just using transformations there has to be communication
+                    b/w classes as well. This is going to be a bit tricky actually. Lets start step by step. Create some kind of object-list, pass it to transform button,
+                    if you press the transform-button, just print the list of objects in objectList."""
+                    #This part sorts the matrices according to their x-position on the transformation-screen.
+                    mSorted = []
+                    mReady = []
+                    if len(self.matrices) > 1:
+                        for matrix in self.matrices:
+                            if len(mSorted) == 0:
+                                mSorted.append(matrix)
+                            else:
+                                for each in mSorted:
+                                    if matrix.container.x < each.container.x:
+                                        mSorted.insert(mSorted.index(each), matrix)
+                                        break
+                        #This part formats the matrices into the correct format for multiplication.
+                        for matrix in mSorted:
+                            formatted = []
+                            for i in range(3):
+                                row = []
+                                for j in range(3):
+                                    row.append(float(matrix.buttonList[i*3 + j].text))
+                                formatted.append(row)
+                            formatted = np.array(formatted)
+                            mReady.append(formatted)
+                        #This part multiplies into a singular matrix
+                        for i in range(len(mReady)):
+                            if i != len(mReady) - 1:
+                                mReady[i+1] = mReady[i+1]@mReady[i]
+                            else:
+                                result = mReady[i]
+                        #Now its time to create the new "goal vectors". This part will animate every change. I basically need to write the logic for animation
+                        #and all of that but for all kinds of objects and not just vectors. At the moment I only have vectors though. I can modify it later to 
+                        #accomodate for other types of 3d objects.
+                        #Vector object is basically just a a vertex and a line drawn b/w. Since that is the case, other transformations will be done in
+                        #practically the same way, since the verteces shift positions and straight lines are drawn b/w.
+                        #In other words, for each object that is in the objectList, the transformation has to be applied to every vertex's first 3 position since
+                        #the fourth is kept at a constant 1.
+                        #For the vector, what I need to do as well is to change each vectorPackage to reflect the changes caused by the transformation as well.
+                    else:
+                        print("No matrices")
+
+    def draw(self):
+        pg.draw.rect(self.render.screen, self.COLOR, self.container, 3)
+        self.render.screen.blit(self.FONT.render(self.text, True, self.COLOR), (self.container.x + 10, self.container.y + 10))
+
+
+
+    """class VectorPackage:
+    def __init__(self, render, x, y, text = ""):
+        self.render = render
+        self.container = pg.Rect(x-10, y-10, 190, 160)
+        self.FONT = pg.font.Font(None, 32)
+        self.COLOR = pg.Color("white")
+        self.inputButtons = []
+        self.active = False
+        for i in range(3):
+            self.inputButtons.append(InputButton(render, x, y+(i*50), 40, 40, "1"))
+        self.confirmationButton = pg.Rect(x+60, y+50, 110, 40)
+        self.text = text
+        self.og_vector = [1, 1, 1, 1]
+        self.goal_vector = [1, 1, 1, 1]
+        self.animation_vector = [1, 1, 1, 1]
+        self.delta_coord = [0, 0, 0]
+        self.change = False
+        self.count = 1
+
+    def draw(self):
+        pg.draw.rect(self.render.screen, self.COLOR, self.container, 3)
+        for button in self.inputButtons:
+            button.draw()
+        pg.draw.rect(self.render.screen, self.COLOR, self.confirmationButton, 3)
+        self.render.screen.blit(self.FONT.render("Change", True, self.COLOR), (self.confirmationButton.x + self.confirmationButton.w / 8, self.confirmationButton.y + self.confirmationButton.h / 4))
+        self.render.screen.blit(self.FONT.render(self.text, True, pg.Color("red")), (self.container.x + 80, self.container.y + 15))
+        self.vector = Vector(self.render, self.animation_vector)
+        self.vector.translate([0.0001, 0.0001, 0.0001])
+        self.vector.movement_flag = False
+        self.vector.draw()
+
+    def eventHandler(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.container.collidepoint(event.pos):
+                    self.active = True
+                if self.confirmationButton.collidepoint(event.pos):
+                    for i in range(3):
+                        self.goal_vector[i] = float(self.inputButtons[i].text)
+                        if self.og_vector[i] != self.goal_vector[i]:
+                            sign = -1 if self.og_vector[i] > self.goal_vector[i] else 1
+                            self.delta_coord[i] = sign*abs(self.og_vector[i] - (self.goal_vector[i]))
+                            self.change = True
+                    print("current " + str(self.og_vector))
+                    print("change " + str(self.delta_coord))
+                    print("end " + str(self.goal_vector))
+        if self.active == True:
+            if event.type == pg.MOUSEMOTION:
+                for button in self.inputButtons:
+                    button.rectangle.move_ip(event.rel)
+                self.container.move_ip(event.rel)
+                self.confirmationButton.move_ip(event.rel)
+        if event.type == pg.MOUSEBUTTONUP:
+            if event.button == 1:
+                self.active = False
+        for button in self.inputButtons:
+            button.eventHandler(event)
+    
+    def animate(self):
+        if self.change == True:
+            for i in range(3):
+                self.animation_vector[i] = self.animation_vector[i] + (1/60) * self.delta_coord[i]
+            self.count += 1
+            if self.count == 60:
+                self.animation_vector = self.goal_vector[:]
+                self.change = False
+                self.count = 1
+                self.delta_coord = [0, 0, 0]
+                self.og_vector = self.animation_vector[:]"""

@@ -29,6 +29,8 @@ class SoftwareRender:
         self.world_axes.translate([0.0001, 0.0001, 0.0001])
 
         self.create_vector = CreateVector(self, 50, 100)
+        self.create_matrix = CreateMatrix(self, 50, 100)
+        self.transform_button = TransformButton(self, 50, 300)
 
         """
         self.v1Button = InputButton(self, 50, 50, 40, 40, "1")
@@ -42,15 +44,15 @@ class SoftwareRender:
         self.transformToMain = navigationButton(self, 50, 200, 250, 40, "Main")
         self.transformToPresets = navigationButton(self, 50, 300, 200, 40, "Presets")
         self.presetsToTransform = navigationButton(self, 50, 200, 250, 40, "Transformation menu")
-        self.inputMatrix = InputMatrix(self, 400, 100)
     
     def draw_main(self):
-        self.screen.fill(pg.Color("darkslategray"))
+        self.screen.fill(pg.Color("black"))
         self.world_axes.draw()
         #self.axes.draw()
         #self.object.draw()
 
         self.create_vector.draw()
+        self.transform_button.draw()
 
         #I will replace this with a new create-vector button which will create new instances of the create-vector class and add them to a list.
         #For each vector in the list, all of the following will be called basically.
@@ -67,7 +69,6 @@ class SoftwareRender:
         """
 
         self.mainToTransform.draw()
-        
     
     def main(self):
         while True:
@@ -92,19 +93,23 @@ class SoftwareRender:
                 """
                 self.mainToTransform.eventHandler(ev)
                 self.create_vector.eventHandler(ev)
+                if len(self.create_vector.vectorList) != 0:
+                    for vector in self.create_vector.vectorList:
+                        self.transform_button.objectList.append(vector)
+                self.transform_button.eventHandler(ev)
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(self.FPS)
 
     def draw_transform(self):
-        self.screen.fill(pg.Color("darkslategray"))
+        self.screen.fill(pg.Color("black"))
         self.transformToMain.draw()
         self.transformToPresets.draw()
-        self.inputMatrix.draw()
+        self.create_matrix.draw()
 
     
     def transformationScreen(self):
-        self.screen.fill(pg.Color("darkslategray"))
+        self.screen.fill(pg.Color("black"))
         running = True
         while running:
             if self.transformToMain.switch == True:
@@ -119,18 +124,19 @@ class SoftwareRender:
                     exit()
                 self.transformToMain.eventHandler(event)
                 self.transformToPresets.eventHandler(event)
-                self.inputMatrix.eventHandler(event)
+                self.create_matrix.eventHandler(event)
+                self.transform_button.matrices = self.create_matrix.matrixList[:]
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(60)
 
     def draw_presets(self):
-        self.screen.fill(pg.Color("darkslategray"))
+        self.screen.fill(pg.Color("black"))
         self.presetsToTransform.draw()
 
     
     def presetsScreen(self):
-        self.screen.fill(pg.Color("darkslategray"))
+        self.screen.fill(pg.Color("black"))
         running = True
         while running:
             if self.presetsToTransform.switch == True:
