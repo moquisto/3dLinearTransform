@@ -93,10 +93,7 @@ class SoftwareRender:
                 """
                 self.mainToTransform.eventHandler(ev)
                 self.create_vector.eventHandler(ev)
-                if len(self.create_vector.vectorList) != 0:
-                    for vector in self.create_vector.vectorList:
-                        self.transform_button.objectList.append(vector)
-                self.transform_button.eventHandler(ev)
+                self.transform_button.eventHandler(ev, [self.create_vector.vectorList])
             pg.display.set_caption(str(self.clock.get_fps()))
             pg.display.flip()
             self.clock.tick(self.FPS)
